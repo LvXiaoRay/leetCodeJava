@@ -3,7 +3,12 @@ package com.bitmain.demo;
 import ch.qos.logback.classic.pattern.LineOfCallerConverter;
 import com.sun.xml.internal.ws.api.client.WSPortInfo;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
+import sun.tools.jstat.Literal;
 
 public class LeetCode31To40 {
 
@@ -290,12 +295,176 @@ public class LeetCode31To40 {
 		}
 	}
 
+	class Solution37 {
+
+		public void solveSudoku(char[][] board) {
+			boolean[][] rows = new boolean[9][9];
+			boolean[][] columns = new boolean[9][9];
+			boolean[][] boxs = new boolean[9][9];
+			for (int i = 0; i < 9; i++) {
+				for (int j = 0; j < 9; j++) {
+					int boxNum = i / 3 * 3 + j / 3;
+					if (board[i][j] != '.') {
+						int num = board[i][j] - '1';
+						rows[i][num] = true;
+						columns[j][num] = true;
+						boxs[boxNum][num] = true;
+					}
+				}
+			}
+			dfs(board, rows, columns, boxs, 0, 0);
+		}
+
+		public boolean dfs(char[][] board, boolean[][] rows, boolean[][] columns, boolean[][] boxs, int i, int j) {
+			while (board[i][j] != '.') {
+				if (++j > 9) {
+					i++;
+					j = 0;
+				}
+				if (i >= 9) {
+					return true;
+				}
+
+			}
+			for (int num = 0; num < 9; num++) {
+				int boxNum = i / 3 * 3 + j / 3;
+				if (!rows[i][num] && !columns[j][num] && !boxs[boxNum][num]) {
+					board[i][j] = (char) (num + '1');
+					rows[i][num] = true;
+					columns[j][num] = true;
+					boxs[boxNum][num] = true;
+					if (dfs(board, rows, columns, boxs, i, j)) {
+						return true;
+					} else {
+						rows[i][num] = false;
+						columns[j][num] = false;
+						boxs[boxNum][num] = false;
+						board[i][j] = '.';
+					}
+				}
+			}
+
+			return false;
+		}
+
+	}
+
+	static class Solution38 {
+
+		public String countAndSay(int n) {
+			if (n <= 0) {
+				return "";
+			} else if (n == 1) {
+				return "1";
+			} else {
+				return transfer(countAndSay(n - 1));
+			}
+
+		}
+
+		public String transfer(String nS) {
+			byte[] list = nS.getBytes();
+			StringBuffer result = new StringBuffer();
+			int count = 1;
+			for (int i = 0; i < list.length; i++) {
+				if (i != list.length - 1) {
+					if (list[i] == list[i + 1]) {
+						count++;
+					} else {
+						result.append(count);
+						result.append(new String(new byte[]{list[i]}));
+						count = 1;
+					}
+				} else {
+					result.append(count);
+					result.append(new String(new byte[]{list[i]}));
+				}
+			}
+			return result.toString();
+		}
+	}
+
+	static class Solution39 {
+
+		public List<List<Integer>> combinationSum(int[] candidates, int target) {
+			List<List<Integer>> result = new ArrayList<>();
+			if (candidates.length == 0) {
+				return result;
+			}
+			Arrays.sort(candidates);
+			List<Integer> solve = new ArrayList<>();
+			dfs(candidates, target, 0, solve, result);
+			return result;
+		}
+
+		public void dfs(int[] candidates, int target, int startIndex, List<Integer> solve, List<List<Integer>> result) {
+			if (target == 0) {
+				result.add((List<Integer>) ((ArrayList<Integer>) solve).clone());
+				return;
+			}
+			if (target < candidates[0]) {
+				return;
+			}
+			for (int start = startIndex; start < candidates.length; start++) {
+				if (target < 0) {
+					return;
+				}
+				solve.add(candidates[start]);
+				dfs(candidates, target - candidates[start], start, solve, result);
+				solve.remove(solve.size() - 1);
+			}
+
+
+		}
+	}
+
+	static class Solution40 {
+
+		public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+			List<List<Integer>> result = new ArrayList<>();
+			if (candidates.length <= 0) {
+				return result;
+			}
+			Arrays.sort(candidates);
+			List<Integer> solve = new ArrayList<>();
+			dfs(candidates, target, 0, result, solve);
+			return result;
+		}
+
+		private void dfs(int[] candidates, int target, int startIndex, List<List<Integer>> result, List<Integer> solve) {
+			if (target == 0) {
+				result.add(new ArrayList<>(solve));
+				return;
+			}
+
+			for (int index = startIndex; index < candidates.length; index++) {
+				if (target < candidates[index] || target < 0) {
+					break;
+				}
+				if (index > startIndex && candidates[index] == candidates[index - 1]) {
+					continue;
+				}
+				solve.add(candidates[index]);
+
+				dfs(candidates, target - candidates[index], index + 1, result, solve);
+				solve.remove(solve.size() - 1);
+			}
+		}
+	}
+
+	boolean setArrays(int[][] a) {
+		System.out.println(a);
+		a[0][0] = 1;
+		return true;
+	}
+
+
 	public static void main(String[] args) {
-		int[] nums = new int[]{1};
-		Solution35 solution35 = new Solution35();
-		int nums2 = solution35.searchInsert(nums, 1);
-		System.out.println(nums2);
-		System.out.println(nums2);
+		int[] n = new int[]{10, 1, 2, 7, 6, 1, 5};
+		Solution40 solution39 = new Solution40();
+		System.out.println(solution39.combinationSum2(n, 7));
+
+
 	}
 
 }
